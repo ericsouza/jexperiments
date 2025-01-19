@@ -5,36 +5,37 @@ import java.time.LocalDate;
 import java.util.Set;
 
 public class WorkingDaysToCalendar {
-    public static LocalDate calcularDataFinal(LocalDate dataInicial, int diasUteis) {
-        if (diasUteis < 0) {
-            throw new IllegalArgumentException("O número de dias úteis deve ser não negativo.");
-        }
-        if (diasUteis == 0) {
-            return dataInicial;
-        }
 
-        LocalDate dataAtual = dataInicial;
-        int diasUteisPassados = 0;
-        int anoInicial = dataInicial.getYear();
-        Set<LocalDate> feriados = HolidaysRepository.calcularFeriados(anoInicial);
-
-        while (diasUteisPassados < diasUteis) {
-            dataAtual = dataAtual.plusDays(1);
-            if (dataAtual.getYear() != anoInicial) {
-                anoInicial = dataAtual.getYear();
-                feriados = HolidaysRepository.calcularFeriados(anoInicial);
-            }
-            if (isDiaUtil(dataAtual, feriados)) {
-                diasUteisPassados++;
-            }
-        }
-
-        return dataAtual;
+    private static boolean isWorkingDay(LocalDate date, Set<LocalDate> holidays) {
+        return !DayOfWeek.SATURDAY.equals(date.getDayOfWeek())
+                && !DayOfWeek.SUNDAY.equals(date.getDayOfWeek())
+                && !holidays.contains(date);
     }
 
-    private static boolean isDiaUtil(LocalDate data, Set<LocalDate> feriados) {
-        return !DayOfWeek.SATURDAY.equals(data.getDayOfWeek())
-                && !DayOfWeek.SUNDAY.equals(data.getDayOfWeek())
-                && !feriados.contains(data);
+    public static LocalDate calculateEndDate(LocalDate startDate, int workingDays) {
+        if (workingDays < 0) {
+            throw new IllegalArgumentException("The number of working days must be non-negative.");
+        }
+        if (workingDays == 0) {
+            return startDate;
+        }
+
+        LocalDate currentDate = startDate;
+        int elapsedWorkingDays = 0;
+        int currentYearForHolidaysCalculation = startDate.getYear();
+        Set<LocalDate> holidays = BrazilianHolidaysRepository.calculateHolidays(currentYearForHolidaysCalculation);
+
+        while (elapsedWorkingDays < workingDays) {
+            currentDate = currentDate.plusDays(1);
+            if (currentDate.getYear() != currentYearForHolidaysCalculation) {
+                currentYearForHolidaysCalculation = currentDate.getYear();
+                holidays = BrazilianHolidaysRepository.calculateHolidays(currentYearForHolidaysCalculation);
+            }
+            if (isWorkingDay(currentDate, holidays)) {
+                elapsedWorkingDays++;
+            }
+        }
+
+        return currentDate;
     }
 }
