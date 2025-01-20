@@ -28,7 +28,7 @@ class BrazilianHolidaysRepository {
     }
 
     private static Set<LocalDate> calculateMovableHolidays(int year) {
-        Set<LocalDate> holidays = new TreeSet<>();
+        Set<LocalDate> holidays = new HashSet<>();
         LocalDate easterDate = calculateEaster(year);
         LocalDate carnivalTuesday = easterDate.minusDays(47);
         holidays.add(carnivalTuesday.minusDays(1));     // Carnival Monday
@@ -44,7 +44,7 @@ class BrazilianHolidaysRepository {
             return cache.get(year);
         }
 
-        Set<LocalDate> holidays = new TreeSet<>();
+        Set<LocalDate> holidays = new HashSet<>();
 
         // Fixed holidays
         holidays.add(LocalDate.of(year, 1, 1));      // New Year's Day
